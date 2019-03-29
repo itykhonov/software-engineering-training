@@ -1,4 +1,4 @@
-// run this command $ node --expose-gc test.js
+// run this command $ node --expose-gc lesson1.js
 
 const os = require('os');
 
@@ -16,7 +16,7 @@ function forceGC() {
    if (global.gc) {
       global.gc();
    } else {
-      console.warn('No GC hook! Start your program as `node --expose-gc test.js`.');
+      console.warn('No GC hook! Start your program as `node --expose-gc lesson1.js`.');
    }
 }
 
