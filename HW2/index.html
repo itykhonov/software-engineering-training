@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Triangle Canvas Example</title>
+    <script src="https://unpkg.com/rbush@2.0.1/rbush.min.js"></script>
+    <style>
+        polygon {
+            stroke: black;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script>
+        var holder;
+        var svg;
+        var container = document.querySelector("#container");
+
+        var tree = rbush();
+        var count = 10;
+        var triangleFace = 50;
+        var canvasWidth = 500;
+        var colors = ['aqua', 'black', 'blue', 'fuchsia', 'gray', 'green', 
+'lime', 'maroon', 'navy', 'olive', 'orange', 'purple', 'red', 
+'silver', 'teal', 'white', 'yellow'];
+
+        init('svg');
+
+        function init(type) {
+            if (type === 'svg') {
+                holder = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                holder.style.width = canvasWidth;
+                holder.style.height = canvasWidth;
+            } else {
+                holder = document.createElement("canvas");
+                context = holder.getContext("2d");
+                holder.width = canvasWidth;
+                holder.height = canvasWidth;
+            }
+            container.appendChild(holder);
+            holder.addEventListener('click', clickHandler)
+            drawTriangles(type);
+        }
+
+        function drawTriangles(type) {
+            for (let index = 0; index < count; index++) {
+                if (type === 'svg') {
+                    drawSvgTriangle(index);
+                } else {
+                    drawCanvasTriangle(index);
+                }
+                
+            }
+        }
+
+        // draw svg triangles
+        function drawSvgTriangle(index) {
+            var start = getStartPosition();
+            var polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            holder.appendChild(polygon);
+
+            var array = arr = [ [ start[0],start[1] ],
+                [ start[0] - triangleFace/2, start[1] + triangleFace ],
+                [ start[0] + triangleFace/2 , start[1] + triangleFace ], ];
+
+            for (value of array) {
+                var point = holder.createSVGPoint();
+                point.x = value[0];
+                point.y = value[1];
+                polygon.style.fill = colors[getRandomInt(0, colors.length - 1)];
+                polygon.points.appendItem(point);
+            }
+
+            insertTrianglesToTree(start, index);
+        }
+        
+        // draw canvas triangles
+        function drawCanvasTriangle(index) {
+            var start = getStartPosition();
+            
+            // the triangle
+            context.beginPath();
+            context.moveTo(start[0], start[1]);
+            context.lineTo(start[0] - triangleFace/2, start[1] + triangleFace);
+            context.lineTo(start[0] + triangleFace/2, start[1] + triangleFace);
+            context.closePath();
+            
+            // the outline
+            context.lineWidth = 3;
+            context.strokeStyle = '#666666';
+            context.stroke();
+            
+            // the fill color
+            context.fillStyle = colors[getRandomInt(0, colors.length - 1)];
+            context.fill();
+
+            insertTrianglesToTree(start, index);
+        }
+
+        function insertTrianglesToTree(start, index) {
+            var triangle = {
+                minX: start[0] - triangleFace/2,
+                minY: start[1],
+                maxX: start[0] + triangleFace/2,
+                maxY: start[1] + triangleFace,
+                triangle: `triangle-${index}`
+            };
+
+            tree.insert(triangle);
+        }
+
+        function getMousePosition(e) {
+            var x;
+            var y;
+            if (e.pageX || e.pageY) { 
+                x = e.pageX;
+                y = e.pageY;
+            } else {
+                x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft; 
+                y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop; 
+            }
+            x -= holder.getBoundingClientRect().top;
+            y -= holder.getBoundingClientRect().left;
+
+            return {
+                x,
+                y,
+            }
+        }
+
+        function getStartPosition() {
+            return [
+                getRandomInt(
+                    0 + triangleFace,
+                    canvasWidth - triangleFace
+                ),
+                getRandomInt(0, canvasWidth - triangleFace)
+            ];
+        }
+
+        function clickHandler(e) {
+            getTriangles(getMousePosition(e));
+        }
+
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+        function getTriangles({x,y}) {
+            console.time();
+            var triangles = tree.search({
+                minX: x,
+                minY: y,
+                maxX: x,
+                maxY: y
+            });
+            console.timeEnd();
+
+            // search 0.208984375ms
+            // search 0.041015625ms
+            // search 0.030029296875ms
+            // search 0.02685546875ms
+            // search 0.02783203125ms
+            // search 0.026123046875ms
+            // search 0.03369140625ms
+            // search 0.016845703125ms
+            // search 0.018798828125ms
+            // search 0.030029296875ms
+            // search 0.026123046875ms
+            // search 0.027099609375ms
+            // search 0.030029296875ms
+        }
+    </script>
+</body>
+</html>
