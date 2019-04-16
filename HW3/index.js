@@ -1,9 +1,9 @@
 // require csvtojson
-var csv = require("csvtojson");
+const csv = require("csvtojson");
 
 // Convert a csv file with csvtojson
-var csv1 = csv().fromFile('./Barcelona1.csv');
-var csv2 = csv().fromFile('./barcelona2.csv');
+const csv1 = csv().fromFile('./Barcelona1.csv');
+const csv2 = csv().fromFile('./barcelona2.csv');
 
 //when parse finished, result will be emitted here.
 Promise.all([csv1, csv2]).then(([arr1, arr2]) => {
