@@ -12,7 +12,7 @@ Promise.all([csv1, csv2]).then(([arr1, arr2]) => {
     console.timeEnd();
     //default: 971.482ms
 
-    console.log('unionArr', unionArr.length) //unionAllArr 8520
+    console.log('unionArr', unionArr.length) //unionArr 8520
 
     console.time();
     const unionAllArr = getOnlyNeededFields(unionAll(arr1, arr2));
