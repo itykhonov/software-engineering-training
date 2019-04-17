@@ -10,28 +10,51 @@ Promise.all([csv1, csv2]).then(([arr1, arr2]) => {
     console.time();
     const unionArr = getOnlyNeededFields(union(arr1, arr2));
     console.timeEnd();
-    //default: 971.482ms
+    //default: 15.986ms
 
-    console.log('unionArr', unionArr.length) //unionArr 8520
+    console.log('unionArr', unionArr.length) //unionArr 8529
 
     console.time();
     const unionAllArr = getOnlyNeededFields(unionAll(arr1, arr2));
     console.timeEnd();
-    //default: 17.985ms
+    //default: 10.728ms
 
     console.log('unionAllArr', unionAllArr.length) //unionAllArr 9929
 });
 
-const union = (arr1, arr2) => [
-    ...arr1,
-    ...arr2.filter(el => !arr1.find(arr1El => el.listing_url.includes(arr1El.id)))
-        .map(getIdFromUrl),
-];
+const union = (arr1, arr2) => {
+    const uniqElems = {};
+
+    return [
+        ...arr1.filter(el => filterUniqElements(el, uniqElems)),
+        ...arr2.map(getIdFromUrl)
+                .filter(el => filterUniqElements(el, uniqElems)),
+    ];
+};
+
 
 const unionAll = (arr1, arr2) => [
     ...arr1,
     ...arr2.map(getIdFromUrl),
 ];
+
+const filterUniqElements = (el, uniqElems) => {
+    const currElem = uniqElems[el.id];
+    if (currElem) {
+        const isEqualEl = currElem.name === el.name &&
+            currElem.zipcode === el.zipcode &&
+            currElem.smart_location === el.smart_location &&
+            currElem.country === el.country &&
+            currElem.latitude === el.latitude &&
+            currElem.longitude === el.longitude;
+
+        if (isEqualEl) {
+            return false;
+        }
+    }
+    uniqElems[el.id] = el;
+    return true;
+}
 
 const getIdFromUrl = (obj) => {
     const urlArr = obj.listing_url.split('/');
